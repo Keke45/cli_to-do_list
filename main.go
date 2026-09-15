@@ -54,52 +54,47 @@ func addTask(title string) {
 	nextID++
 }
 
-func deleteTask(id int) {
+func deleteTask(id int) error {
 	if len(tasks) == 0 {
-		fmt.Println("No tasks found.")
-		return
+		return fmt.Errorf("no tasks found")
 	}
 	for i := range tasks {
 		if tasks[i].ID == id {
 			tasks = append(tasks[:i], tasks[i+1:]...)
-			fmt.Printf("Task %d deleted.\n", id)
-			return
+			return nil
 		}
 	}
-	fmt.Printf("Task %d not found.\n", id)
+	return fmt.Errorf("task %d not found", id)
 }
 
 func viewTasks() {
 	if len(tasks) == 0 {
 		fmt.Println("No tasks found.")
-	} else {
-		for _, task := range tasks {
-			if task.Completed {
-				fmt.Printf(" %d. [X] %s\n", task.ID, task.Title)
-			} else {
-				fmt.Printf(" %d. [ ] %s\n", task.ID, task.Title)
-			}
+		return
+	}
+	for _, task := range tasks {
+		if task.Completed {
+			fmt.Printf(" %d. [X] %s\n", task.ID, task.Title)
+		} else {
+			fmt.Printf(" %d. [ ] %s\n", task.ID, task.Title)
 		}
 	}
 }
 
-func completeTask(id int) {
+func completeTask(id int) error {
 	if len(tasks) == 0 {
-		fmt.Println("No tasks found.")
-		return
+		return fmt.Errorf("no tasks found")
 	}
 	for i := range tasks {
 		if tasks[i].ID == id {
 			if tasks[i].Completed {
-				fmt.Printf("Task %d is already completed.\n", id)
-				return
+				return fmt.Errorf("task %d is already completed", id)
 			}
 			tasks[i].Completed = true
-			fmt.Printf("Task %d marked as completed.\n", id)
-			return
+			return nil
 		}
 	}
-	fmt.Printf("Task %d not found.\n", id)
+	return fmt.Errorf("task %d not found", id)
 }
 
 func getIntInput(scanner *bufio.Scanner, prompt string) (int, error) {
@@ -107,7 +102,6 @@ func getIntInput(scanner *bufio.Scanner, prompt string) (int, error) {
 	if !scanner.Scan() {
 		return 0, fmt.Errorf("failed to read input")
 	}
-
 	return strconv.Atoi(scanner.Text())
 }
 
@@ -140,6 +134,7 @@ func main() {
 			scanner.Scan()
 			title := scanner.Text()
 			addTask(title)
+
 			err := saveTasks()
 			if err != nil {
 				fmt.Println("Error saving tasks:", err)
@@ -147,34 +142,35 @@ func main() {
 
 		case 2:
 			viewTasks()
+
 		case 3:
-			if len(tasks) == 0 {
-				fmt.Println("No tasks to complete.")
-				continue
-			}
 			viewTasks()
 			id, err := getIntInput(scanner, "Enter task ID to mark as completed: ")
 			if err != nil {
 				fmt.Println("Invalid input. Please enter a number.")
 				continue
 			}
-			completeTask(id)
+			err = completeTask(id)
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
+			}
 			err = saveTasks()
 			if err != nil {
 				fmt.Println("Error saving tasks:", err)
 			}
 		case 4:
-			if len(tasks) == 0 {
-				fmt.Println("No tasks to delete.")
-				continue
-			}
 			viewTasks()
 			id, err := getIntInput(scanner, "Enter task ID to delete: ")
 			if err != nil {
 				fmt.Println("Invalid input. Please enter a number.")
 				continue
 			}
-			deleteTask(id)
+			err = deleteTask(id)
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
+			}
 			err = saveTasks()
 			if err != nil {
 				fmt.Println("Error saving tasks:", err)
