@@ -145,6 +145,10 @@ func main() {
 
 		case 3:
 			viewTasks()
+			if len(tasks) == 0 {
+				fmt.Println("No tasks found.")
+				continue
+			}
 			id, err := getIntInput(scanner, "Enter task ID to mark as completed: ")
 			if err != nil {
 				fmt.Println("Invalid input. Please enter a number.")
@@ -161,6 +165,10 @@ func main() {
 			}
 		case 4:
 			viewTasks()
+			if len(tasks) == 0 {
+				fmt.Println("No tasks found.")
+				continue
+			}
 			id, err := getIntInput(scanner, "Enter task ID to delete: ")
 			if err != nil {
 				fmt.Println("Invalid input. Please enter a number.")
